@@ -700,7 +700,7 @@
 
 <script>
 (function(){
-  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var reduceMotion = false; 
 
   /* ---- split-flap name ---- */
   var GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -710,21 +710,17 @@
     word.split('').forEach(function(ch, i){
       var tile = document.createElement('span');
       tile.className = 'flap' + (accentLast && i === word.length - 1 ? ' accent' : '');
-      if (reduceMotion){
-        tile.textContent = ch;
-      } else {
-        tile.textContent = GLYPHS[Math.floor(Math.random()*26)];
-        var delay = 240 + wi*260 + i*95;
-        var spins = 7 + Math.floor(Math.random()*5);
-        setTimeout(function(){
-          var n = 0;
-          var iv = setInterval(function(){
-            n++;
-            if (n >= spins){ tile.textContent = ch; clearInterval(iv); }
-            else { tile.textContent = GLYPHS[Math.floor(Math.random()*26)]; }
-          }, 62);
-        }, delay);
-      }
+      tile.textContent = GLYPHS[Math.floor(Math.random()*26)];
+      var delay = 400 + wi*400 + i*150;
+      var spins = 10 + Math.floor(Math.random()*5);
+      setTimeout(function(){
+        var n = 0;
+        var iv = setInterval(function(){
+          n++;
+          if (n >= spins){ tile.textContent = ch; clearInterval(iv); }
+          else { tile.textContent = GLYPHS[Math.floor(Math.random()*26)]; }
+        }, 120);
+      }, delay);
       wordEl.appendChild(tile);
     });
   });
