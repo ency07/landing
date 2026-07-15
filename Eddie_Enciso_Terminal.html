@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eddie Enciso — Terminal EE · Diseñador Gráfico Ambiental & Creative Technologist</title>
+<meta name="description" content="20 años diseñando cómo la gente se orienta. Señalización, wayfinding, branding y sistemas con IA. Barranquilla, Colombia.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%23111518'/%3E%3Cpath d='M8 16h12M14 10l6 6-6 6' stroke='%23FFC72C' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#111518;
+    --panel:#191F23;
+    --tile:#20282D;
+    --tile-hi:#2A343A;
+    --line:rgba(244,246,245,.09);
+    --white:#F4F6F5;
+    --muted:#93A3A9;
+    --yellow:#FFC72C;
+    --teal:#35C4B5;
+    --exit:#1FBF6B;
+    --ink:#111518;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0; background:var(--bg); color:var(--white);
+    font-family:'Archivo', sans-serif; line-height:1.6;
+    background-image:radial-gradient(rgba(244,246,245,.035) 1px, transparent 1px);
+    background-size:26px 26px;
+  }
+  a{ color:inherit; }
+  h1,h2,h3{ margin:0; }
+  .mono{ font-family:'IBM Plex Mono', monospace; letter-spacing:.08em; text-transform:uppercase; }
+  .wrap{ max-width:1060px; margin:0 auto; padding:0 26px; }
+  section{ padding:110px 0; position:relative; }
+  @media (max-width:720px){ section{ padding:72px 0; } }
+
+  ::selection{ background:var(--yellow); color:var(--ink); }
+
+  [data-reveal]{ opacity:0; transform:translateY(22px); transition:opacity .7s ease, transform .7s cubic-bezier(.22,.61,.36,1); }
+  [data-reveal].in{ opacity:1; transform:translateY(0); }
+
+  /* ============ progress bar ============ */
+  #progress{
+    position:fixed; top:0; left:0; height:3px; width:0%;
+    background:var(--yellow); z-index:60;
+  }
+
+  /* ============ wayfinding rail ============ */
+  .rail{
+    position:fixed; left:22px; top:50%; transform:translateY(-50%);
+    z-index:50; display:flex; flex-direction:column; gap:4px;
+  }
+  @media (max-width:1180px){ .rail{ display:none; } }
+  .rail::before{
+    content:""; position:absolute; left:5px; top:8px; bottom:8px; width:2px;
+    background:var(--line);
+  }
+  .rail a{
+    display:flex; align-items:center; gap:12px; text-decoration:none;
+    padding:7px 0; position:relative;
+  }
+  .rail .dot{
+    width:12px; height:12px; border-radius:50%; flex-shrink:0;
+    background:var(--bg); border:2px solid var(--muted);
+    transition:all .3s ease; position:relative; z-index:1;
+  }
+  .rail .lbl{
+    font-family:'IBM Plex Mono'; font-size:.6rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--muted);
+    opacity:0; transform:translateX(-6px);
+    transition:opacity .3s ease, transform .3s ease;
+    white-space:nowrap;
+  }
+  .rail a:hover .lbl{ opacity:.7; transform:translateX(0); }
+  .rail a.active .dot{ background:var(--yellow); border-color:var(--yellow); box-shadow:0 0 0 4px rgba(255,199,44,.18); }
+  .rail a.active .lbl{ opacity:1; transform:translateX(0); color:var(--yellow); }
+  .rail .youare{
+    font-family:'IBM Plex Mono'; font-size:.52rem; letter-spacing:.12em;
+    color:var(--yellow); opacity:0; margin-left:24px; margin-top:-2px;
+    transition:opacity .3s ease; display:block; height:0; overflow:visible;
+  }
+  .rail a.active + .youare{ opacity:.85; }
+
+  /* ============ signage bits ============ */
+  .zone-head{ display:flex; align-items:stretch; gap:0; margin-bottom:48px; border:1px solid var(--line); background:var(--panel); }
+  .zone-head .znum{
+    background:var(--yellow); color:var(--ink);
+    font-family:'IBM Plex Mono'; font-weight:600; font-size:1.05rem;
+    display:flex; align-items:center; padding:16px 20px; letter-spacing:.05em;
+  }
+  .zone-head .ztxt{ padding:12px 22px; display:flex; flex-direction:column; justify-content:center; }
+  .zone-head h2{ font-size:clamp(1.3rem,3.4vw,1.9rem); font-weight:800; text-transform:uppercase; letter-spacing:.02em; line-height:1.15; }
+  .zone-head .en{ font-family:'IBM Plex Mono'; font-size:.66rem; color:var(--muted); letter-spacing:.16em; text-transform:uppercase; margin-top:3px; }
+  .zone-head .zarr{ margin-left:auto; display:flex; align-items:center; padding:0 22px; color:var(--yellow); font-size:1.5rem; }
+
+  /* ============ HERO ============ */
+  .hero{
+    min-height:100svh; display:flex; flex-direction:column;
+    position:relative; padding:0; overflow:hidden;
+  }
+  .hero-top{
+    border-bottom:1px solid var(--line);
+    padding:16px 26px; display:flex; justify-content:space-between; gap:14px;
+    font-family:'IBM Plex Mono'; font-size:.64rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--muted);
+    animation:fadeDown .7s ease-out both;
+  }
+  .hero-top .live{ color:var(--exit); }
+  .hero-top .live::before{
+    content:""; display:inline-block; width:7px; height:7px; border-radius:50%;
+    background:var(--exit); margin-right:7px; vertical-align:1px;
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.25; } }
+  @keyframes fadeDown{ from{ opacity:0; transform:translateY(-10px); } to{ opacity:1; transform:translateY(0); } }
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(16px); } to{ opacity:1; transform:translateY(0); } }
+
+  .hero-main{
+    flex:1; display:flex; flex-direction:column; justify-content:center;
+    max-width:1060px; width:100%; margin:0 auto; padding:60px 26px;
+  }
+  .signband{
+    display:inline-flex; align-items:center; gap:14px;
+    background:var(--yellow); color:var(--ink);
+    padding:10px 18px; width:fit-content;
+    font-weight:800; font-size:.82rem; letter-spacing:.18em; text-transform:uppercase;
+    animation:fadeUp .7s ease-out .15s both;
+  }
+  .signband svg{ width:20px; height:20px; }
+
+  .flapname{ margin:34px 0 10px; animation:fadeUp .7s ease-out .3s both; }
+  .flapword{ display:flex; flex-wrap:wrap; gap:.09em; margin-bottom:.12em; }
+  .flap{
+    position:relative; display:flex; align-items:center; justify-content:center;
+    width:.74em; height:1.06em;
+    font-size:clamp(2.6rem, 9.2vw, 6.4rem);
+    font-weight:900; color:var(--white);
+    background:linear-gradient(180deg, var(--tile-hi) 0%, var(--tile) 48%, #1B2226 52%, var(--tile) 100%);
+    border-radius:.06em;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.04), 0 2px 6px rgba(0,0,0,.4);
+    line-height:1;
+  }
+  .flap::after{
+    content:""; position:absolute; left:0; right:0; top:50%; height:1px;
+    background:rgba(0,0,0,.5);
+  }
+  .flap.accent{ color:var(--yellow); }
+
+  .hero-sub{
+    max-width:600px; font-size:clamp(1rem, 2vw, 1.2rem); color:#C4CFD2;
+    margin:22px 0 0; animation:fadeUp .7s ease-out 1.5s both;
+  }
+  .hero-sub strong{ color:var(--white); font-weight:700; }
+  .hero-ctas{ display:flex; gap:14px; flex-wrap:wrap; margin-top:34px; animation:fadeUp .7s ease-out 1.75s both; }
+  .btn{
+    font-family:'IBM Plex Mono'; font-size:.78rem; letter-spacing:.1em; text-transform:uppercase;
+    text-decoration:none; padding:15px 26px; border-radius:3px;
+    border:1.5px solid var(--yellow); color:var(--yellow);
+    transition:background .25s ease, color .25s ease, transform .25s ease;
+  }
+  .btn:hover{ transform:translateY(-2px); }
+  .btn.solid{ background:var(--yellow); color:var(--ink); font-weight:600; }
+  .btn.solid:hover{ background:#FFD65C; }
+  .btn.ghost:hover{ background:rgba(255,199,44,.1); }
+
+  .hero-foot{
+    border-top:1px solid var(--line); padding:14px 26px;
+    display:flex; justify-content:space-between; align-items:center; gap:18px;
+    font-family:'IBM Plex Mono'; font-size:.62rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--muted);
+    animation:fadeUp .7s ease-out 2s both;
+  }
+  .picto-row{ display:flex; gap:20px; align-items:center; }
+  .picto-row svg{ width:19px; height:19px; stroke:var(--muted); opacity:.8; }
+  .hero-arrow-bg{
+    position:absolute; right:-120px; top:50%; transform:translateY(-50%);
+    width:520px; height:520px; opacity:.045; pointer-events:none;
+  }
+  @media (max-width:800px){ .hero-arrow-bg{ display:none; } }
+
+  /* ============ PERFIL ============ */
+  .perfil-grid{ display:grid; grid-template-columns:1.4fr 1fr; gap:44px; align-items:start; }
+  @media (max-width:800px){ .perfil-grid{ grid-template-columns:1fr; } }
+  .perfil-grid .big{
+    font-size:clamp(1.35rem, 3vw, 1.9rem); font-weight:600; line-height:1.4; margin:0;
+  }
+  .perfil-grid .big em{ font-style:normal; color:var(--yellow); }
+  .perfil-grid .big .t{ color:var(--teal); }
+  .datapanel{ border:1px solid var(--line); background:var(--panel); }
+  .datapanel .row{
+    display:flex; justify-content:space-between; gap:14px;
+    padding:13px 18px; border-bottom:1px solid var(--line);
+    font-size:.85rem;
+  }
+  .datapanel .row:last-child{ border-bottom:none; }
+  .datapanel .k{ font-family:'IBM Plex Mono'; font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); padding-top:3px; }
+  .datapanel .v{ text-align:right; font-weight:600; }
+
+  /* ============ DEPARTURES BOARD ============ */
+  .board{ border:1px solid var(--line); background:var(--panel); overflow-x:auto; }
+  .board-inner{ min-width:660px; }
+  .board-head, .board-row{
+    display:grid; grid-template-columns:130px 1.35fr 1fr 128px;
+    gap:16px; padding:14px 20px; align-items:center;
+  }
+  .board-head{
+    font-family:'IBM Plex Mono'; font-size:.6rem; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--ink); background:var(--yellow); font-weight:600;
+  }
+  .board-row{ border-top:1px solid var(--line); transition:background .25s ease; }
+  .board-row:hover{ background:rgba(255,199,44,.045); }
+  .board-row .yr{ font-family:'IBM Plex Mono'; font-size:.74rem; color:var(--muted); letter-spacing:.06em; }
+  .board-row .dest{ font-weight:800; text-transform:uppercase; font-size:.95rem; letter-spacing:.03em; line-height:1.25; }
+  .board-row .dest small{ display:block; font-weight:500; text-transform:none; letter-spacing:0; color:var(--muted); font-size:.78rem; margin-top:2px; }
+  .board-row .op{ font-size:.84rem; color:#B9C5C9; }
+  .status{
+    font-family:'IBM Plex Mono'; font-size:.6rem; letter-spacing:.12em; text-transform:uppercase;
+    padding:6px 10px; border-radius:2px; text-align:center; white-space:nowrap;
+  }
+  .status.done{ background:rgba(147,163,169,.12); color:var(--muted); }
+  .status.now{ background:rgba(31,191,107,.14); color:var(--exit); }
+  .status.now::before{
+    content:""; display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:var(--exit); margin-right:6px; vertical-align:1px;
+    animation:pulse 2s ease-in-out infinite;
+  }
+  .board-row.hl .dest{ color:var(--teal); }
+
+  /* ============ GATES ============ */
+  .gates{ display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  @media (max-width:760px){ .gates{ grid-template-columns:1fr; } }
+  .gate{ border:1px solid var(--line); background:var(--panel); display:flex; flex-direction:column; }
+  .gate-top{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px; border-bottom:1px solid var(--line);
+  }
+  .gate-top .code{
+    font-family:'IBM Plex Mono'; font-weight:600; font-size:1.3rem;
+    color:var(--yellow); letter-spacing:.04em;
+  }
+  .gate-top .tag{
+    font-family:'IBM Plex Mono'; font-size:.6rem; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--muted);
+  }
+  .gate .imgwrap{ height:215px; overflow:hidden; position:relative; }
+  .gate .imgwrap img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    filter:grayscale(55%) contrast(1.06) brightness(.9);
+    transition:filter .5s ease, transform .5s ease;
+  }
+  .gate .imgwrap::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(180deg, transparent 55%, rgba(17,21,24,.55));
+    pointer-events:none;
+  }
+  .gate:hover .imgwrap img{ filter:grayscale(0%) contrast(1.02) brightness(1); transform:scale(1.04); }
+  .gate-body{ padding:20px 20px 24px; display:flex; flex-direction:column; gap:12px; flex:1; }
+  .gate-body h3{ font-size:1.06rem; font-weight:700; line-height:1.3; }
+  .gate-body dl{ margin:auto 0 0; font-size:.8rem; }
+  .gate-body dt{ font-family:'IBM Plex Mono'; font-size:.58rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin-top:9px; }
+  .gate-body dd{ margin:2px 0 0; color:#C4CFD2; }
+
+  /* ============ CONEXIONES (IA) ============ */
+  .pipeline{
+    display:flex; flex-wrap:wrap; align-items:center; gap:10px;
+    margin-bottom:44px; padding:22px; border:1px solid var(--line); background:var(--panel);
+  }
+  .pnode{
+    background:var(--tile); border:1px solid var(--line); border-radius:3px;
+    padding:10px 16px; text-align:center;
+  }
+  .pnode strong{ display:block; font-size:.86rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; }
+  .pnode span{ font-family:'IBM Plex Mono'; font-size:.58rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+  .parrow{ color:var(--yellow); font-size:1.1rem; }
+
+  .connex{ display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  @media (max-width:760px){ .connex{ grid-template-columns:1fr; } }
+  .cx{
+    border:1px solid var(--line); background:var(--panel); padding:22px 22px 24px;
+    border-top:3px solid var(--teal);
+  }
+  .cx .cxtag{ font-family:'IBM Plex Mono'; font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:var(--teal); }
+  .cx h3{ font-size:1.02rem; font-weight:700; margin:10px 0 12px; line-height:1.3; }
+  .cx dl{ margin:0; font-size:.8rem; }
+  .cx dt{ font-family:'IBM Plex Mono'; font-size:.58rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin-top:9px; }
+  .cx dd{ margin:2px 0 0; color:#C4CFD2; }
+
+  /* ============ EQUIPAJE (skills) ============ */
+  .chips-group{ margin-bottom:26px; }
+  .chips-group .glbl{
+    font-family:'IBM Plex Mono'; font-size:.62rem; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:12px; display:block;
+  }
+  .chips{ display:flex; flex-wrap:wrap; gap:9px; }
+  .chips span{
+    font-family:'IBM Plex Mono'; font-size:.72rem; letter-spacing:.06em;
+    border:1px solid var(--line); background:var(--panel);
+    padding:8px 14px; border-radius:2px; color:#C4CFD2;
+    transition:border-color .25s ease, color .25s ease;
+  }
+  .chips span:hover{ border-color:var(--yellow); color:var(--yellow); }
+  .chips.t span:hover{ border-color:var(--teal); color:var(--teal); }
+
+  /* ============ SALIDA (contact) ============ */
+  .exit-panel{
+    background:var(--exit); color:#07130C;
+    display:grid; grid-template-columns:auto 1fr; gap:30px; align-items:center;
+    padding:44px 46px; border-radius:4px;
+    box-shadow:0 0 60px rgba(31,191,107,.22);
+  }
+  @media (max-width:760px){ .exit-panel{ grid-template-columns:1fr; padding:34px 28px; } }
+  .exit-sign{ display:flex; align-items:center; gap:20px; }
+  .exit-sign svg{ width:64px; height:64px; flex-shrink:0; }
+  .exit-sign .xw{ font-size:clamp(2.6rem,6vw,4.4rem); font-weight:900; text-transform:uppercase; letter-spacing:.02em; line-height:1; }
+  .exit-sign .xw small{ display:block; font-family:'IBM Plex Mono'; font-size:.8rem; font-weight:500; letter-spacing:.3em; margin-top:6px; }
+  .exit-info p{ margin:0 0 20px; font-size:1rem; font-weight:600; max-width:440px; }
+  .exit-ctas{ display:flex; gap:12px; flex-wrap:wrap; }
+  .xbtn{
+    font-family:'IBM Plex Mono'; font-size:.76rem; letter-spacing:.08em;
+    text-decoration:none; padding:13px 20px; border-radius:3px;
+    background:#07130C; color:var(--exit); font-weight:600;
+    transition:transform .25s ease;
+  }
+  .xbtn:hover{ transform:translateY(-2px); }
+  .xbtn.o{ background:transparent; border:1.5px solid #07130C; color:#07130C; }
+
+  .exit-photo{ margin-top:26px; border:1px solid var(--line); background:var(--panel); }
+  .exit-photo img{ width:100%; height:280px; object-fit:cover; display:block; filter:saturate(1.15); }
+  .exit-photo figcaption{
+    font-family:'IBM Plex Mono'; font-size:.62rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--muted); padding:12px 18px;
+  }
+  .exit-photo figcaption b{ color:var(--exit); font-weight:600; }
+
+  footer{
+    border-top:1px solid var(--line); padding:26px;
+    display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    font-family:'IBM Plex Mono'; font-size:.6rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--muted);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    [data-reveal]{ transition:none; opacity:1; transform:none; }
+    .hero-top,.signband,.flapname,.hero-sub,.hero-ctas,.hero-foot{ animation:none; }
+    .hero-top .live::before, .status.now::before{ animation:none; }
+    .btn:hover,.xbtn:hover{ transform:none; }
+    .gate:hover .imgwrap img{ transform:none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<!-- wayfinding rail -->
+<nav class="rail" aria-label="Navegación de zonas">
+  <a href="#hero" data-zone="hero"><span class="dot"></span><span class="lbl">Inicio</span></a>
+  <a href="#perfil" data-zone="perfil"><span class="dot"></span><span class="lbl">01 · Perfil</span></a>
+  <a href="#trayectoria" data-zone="trayectoria"><span class="dot"></span><span class="lbl">02 · Salidas</span></a>
+  <a href="#puertas" data-zone="puertas"><span class="dot"></span><span class="lbl">03 · Puertas</span></a>
+  <a href="#conexiones" data-zone="conexiones"><span class="dot"></span><span class="lbl">04 · Conexiones</span></a>
+  <a href="#equipaje" data-zone="equipaje"><span class="dot"></span><span class="lbl">05 · Equipaje</span></a>
+  <a href="#referencias" data-zone="referencias"><span class="dot"></span><span class="lbl">05b · Referencias</span></a>
+  <a href="#salida" data-zone="salida"><span class="dot"></span><span class="lbl">06 · Salida</span></a>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="hero">
+  <div class="hero-top mono">
+    <span>Terminal EE — Barranquilla · BAQ</span>
+    <span class="live">Disponible para proyectos</span>
+    <span>Hora local — <span id="clock">--:--</span></span>
+  </div>
+
+  <svg class="hero-arrow-bg" viewBox="0 0 100 100" aria-hidden="true">
+    <path d="M10 50h55M45 25l25 25-25 25" stroke="#F4F6F5" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+
+  <div class="hero-main">
+    <div class="signband">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 12h14M11 6l6 6-6 6" stroke="#111518" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Bienvenido · Welcome
+    </div>
+
+    <div class="flapname" id="flapname" aria-label="EDDIE ENCISO">
+      <div class="flapword" data-word="EDDIE"></div>
+      <div class="flapword" data-word="ENCISO" data-last-accent="true"></div>
+    </div>
+
+    <p class="hero-sub"><strong>20 años diseñando cómo la gente encuentra su camino</strong> — en aeropuertos, ciudades y marcas. Hoy diseño con IA cómo las marcas encuentran el suyo.</p>
+
+    <div class="hero-ctas">
+      <a class="btn solid" href="Eddie_Enciso_CV_print.pdf">Descargar CV ↓</a>
+      <a class="btn ghost" href="#puertas">Ver puertas →</a>
+    </div>
+  </div>
+
+  <div class="hero-foot mono">
+    <span>Diseño ambiental · Wayfinding · Branding · Sistemas con IA</span>
+    <div class="picto-row" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M2 16l20-6M12 4l3 7M6 20h12"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><circle cx="12" cy="6" r="2.4"/><path d="M12 9v6M12 15l-4 6M12 15l4 6M7 11h10"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+    </div>
+  </div>
+</header>
+
+<!-- ============ ZONA 01 · PERFIL ============ -->
+<section class="wrap" id="perfil">
+  <div class="zone-head" data-reveal>
+    <div class="znum">Z-01</div>
+    <div class="ztxt"><h2>Información</h2><span class="en">Perfil / Profile</span></div>
+    <div class="zarr">→</div>
+  </div>
+
+  <div class="perfil-grid">
+    <p class="big" data-reveal>No soy solamente un diseñador: durante más de dos décadas he proyectado <em>cómo la gente se orienta</em>. Hoy sumo <span class="t">IA generativa y desarrollo de software</span> a ese mismo oficio — resolver cómo algo se entiende de un vistazo.</p>
+    <div class="datapanel" data-reveal>
+      <div class="row"><span class="k">Base</span><span class="v">Barranquilla, CO</span></div>
+      <div class="row"><span class="k">Experiencia</span><span class="v">20+ años</span></div>
+      <div class="row"><span class="k">Rol actual</span><span class="v">Independiente — diseño & IA</span></div>
+      <div class="row"><span class="k">Especialidad</span><span class="v">Wayfinding · Señalización</span></div>
+      <div class="row"><span class="k">Desde 2022</span><span class="v">Sistemas & IA</span></div>
+      <div class="row"><span class="k">Internacional</span><span class="v">España · 18 meses · Valencia</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ZONA 02 · TRAYECTORIA ============ -->
+<section class="wrap" id="trayectoria">
+  <div class="zone-head" data-reveal>
+    <div class="znum">Z-02</div>
+    <div class="ztxt"><h2>Tablero de salidas</h2><span class="en">Trayectoria / Departures</span></div>
+    <div class="zarr">→</div>
+  </div>
+
+  <div class="board" data-reveal>
+    <div class="board-inner">
+      <div class="board-head"><span>Año</span><span>Destino</span><span>Operador</span><span>Estado</span></div>
+      <div class="board-row hl">
+        <span class="yr">2022 — 2026</span>
+        <span class="dest">Sistemas & IA<small>ERPs multi-tenant, integraciones de APIs, agentes de codificación, MCP</small></span>
+        <span class="op">Next.js · Supabase · Claude · Gemini</span>
+        <span class="status now">En curso</span>
+      </div>
+      <div class="board-row">
+        <span class="yr">2008 — hoy</span>
+        <span class="dest">Diseño, branding & IA<small>Identidades, packaging, señalización y soluciones con IA para clientes independientes</small></span>
+        <span class="op">Freelance</span>
+        <span class="status now">En curso</span>
+      </div>
+      <div class="board-row">
+        <span class="yr">2024 — 2026</span>
+        <span class="dest">Experiencia internacional<small>Funciones operativas y atención al cliente durante 18 meses: gestión de cobros y manejo de efectivo, trabajo en equipo bajo alta demanda, adaptación a procedimientos de empresas españolas</small></span>
+        <span class="op">España — Alicante · Barcelona · Valencia</span>
+        <span class="status done">Completado</span>
+      </div>
+      <div class="board-row">
+        <span class="yr">2013 — 2024</span>
+        <span class="dest">Director de arte<small>Coordinación de diseño y equipo de técnicos de arte gráfico</small></span>
+        <span class="op">Seguridad y Servicios Señalización</span>
+        <span class="status done">Completado</span>
+      </div>
+      <div class="board-row">
+        <span class="yr">2009 — 2012</span>
+        <span class="dest">Operador MPCDG</span>
+        <span class="op">C.I. Farmacápsula S.A.</span>
+        <span class="status done">Completado</span>
+      </div>
+      <div class="board-row">
+        <span class="yr">2008 — 2009</span>
+        <span class="dest">Diseñador gráfico</span>
+        <span class="op">Copicopias Ltda.</span>
+        <span class="status done">Completado</span>
+      </div>
+      <div class="board-row">
+        <span class="yr">2005 — 2008</span>
+        <span class="dest">Diseñador gráfico</span>
+        <span class="op">Auroscopias · Camisetas y Estampados del Caribe</span>
+        <span class="status done">Completado</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ZONA 03 · PUERTAS ============ -->
+<section class="wrap" id="puertas">
+  <div class="zone-head" data-reveal>
+    <div class="znum">Z-03</div>
+    <div class="ztxt"><h2>Puertas de embarque</h2><span class="en">Proyectos insignia / Gates</span></div>
+    <div class="zarr">→</div>
+  </div>
+
+  <div class="gates">
+    <article class="gate" data-reveal>
+      <div class="gate-top"><span class="code">A-01</span><span class="tag">Turismo</span></div>
+      <div class="imgwrap"><img src="images/fontur-cartagena.jpg" alt="Tótem de señalización turística instalado en Bocagrande, Cartagena" loading="lazy"></div>
+      <div class="gate-body">
+        <h3>Señalización turística peatonal y vial de Cartagena de Indias</h3>
+        <dl>
+          <dt>Empresa</dt><dd>Fondo Nacional de Turismo — FONTUR</dd>
+          <dt>Ciudad</dt><dd>Cartagena</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="gate" data-reveal>
+      <div class="gate-top"><span class="code">A-02</span><span class="tag">Marca nacional</span></div>
+      <div class="gate-body">
+        <h3>Señalización e identificación marcaria a nivel nacional</h3>
+        <dl>
+          <dt>Empresa</dt><dd>Promigas S.A. E.S.P.</dd>
+          <dt>Ciudad</dt><dd>Barranquilla · Cartagena · Riohacha</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="gate" data-reveal>
+      <div class="gate-top"><span class="code">B-01</span><span class="tag">Infraestructura</span></div>
+      <div class="imgwrap"><img src="images/aeropuerto-camilo-daza.jpg" alt="Fachada iluminada del Aeropuerto Internacional Camilo Daza" loading="lazy"></div>
+      <div class="gate-body">
+        <h3>Modernización aeropuertos de Nororiente, hitos 1 y 2</h3>
+        <dl>
+          <dt>Empresa</dt><dd>Aeropuertos de Oriente S.A.S.</dd>
+          <dt>Ciudad</dt><dd>Barrancabermeja · Bucaramanga · Cúcuta · Riohacha · Valledupar</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="gate" data-reveal>
+      <div class="gate-top"><span class="code">B-02</span><span class="tag">Cultura</span></div>
+      <div class="gate-body">
+        <h3>Plan de señalización turística de artesanos, municipio de Galapa</h3>
+        <dl>
+          <dt>Empresa</dt><dd>Secretaría de Cultura, Patrimonio y Turismo de Barranquilla</dd>
+          <dt>Ciudad</dt><dd>Galapa</dd>
+        </dl>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ ZONA 04 · CONEXIONES ============ -->
+<section class="wrap" id="conexiones">
+  <div class="zone-head" data-reveal>
+    <div class="znum">Z-04</div>
+    <div class="ztxt"><h2>Terminal digital</h2><span class="en">Sistemas & IA / Connections</span></div>
+    <div class="zarr">→</div>
+  </div>
+
+  <div class="pipeline" data-reveal aria-label="Flujo de diseño con IA">
+    <div class="pnode"><strong>Claude</strong><span>concepto</span></div><span class="parrow">→</span>
+    <div class="pnode"><strong>Bing IC</strong><span>generación</span></div><span class="parrow">→</span>
+    <div class="pnode"><strong>Gemini</strong><span>refinamiento</span></div><span class="parrow">→</span>
+    <div class="pnode"><strong>Recraft V3</strong><span>vectorización</span></div><span class="parrow">→</span>
+    <div class="pnode"><strong>CorelDRAW · Illustrator · Photoshop</strong><span>producción</span></div>
+  </div>
+
+  <div class="connex">
+    <div class="cx" data-reveal>
+      <span class="cxtag">ERP multi-tenant</span>
+      <h3>ERP B2B Premium para gestión de procesos de negocio</h3>
+      <dl>
+        <dt>Stack</dt><dd>Next.js · Supabase · RBAC dinámico · RLS</dd>
+        <dt>Alcance</dt><dd>Módulo B2B-import, arquitectura multi-tenant</dd>
+      </dl>
+    </div>
+    <div class="cx" data-reveal>
+      <span class="cxtag">Integraciones</span>
+      <h3>Integración de múltiples APIs de terceros en producción</h3>
+      <dl>
+        <dt>Stack</dt><dd>Etsy API v3 · Printful · Leonardo AI · Google Trends</dd>
+        <dt>Alcance</dt><dd>Catálogos, fulfillment e investigación de mercado</dd>
+      </dl>
+    </div>
+    <div class="cx" data-reveal>
+      <span class="cxtag">IA multi-proveedor</span>
+      <h3>Integración de proveedores de IA con control de costos</h3>
+      <dl>
+        <dt>Stack</dt><dd>Gemini · Grok · DeepSeek</dd>
+        <dt>Alcance</dt><dd>Límites de uso y control de costos en producción</dd>
+      </dl>
+    </div>
+    <div class="cx" data-reveal>
+      <span class="cxtag">Seguridad</span>
+      <h3>Auditorías técnicas multi-rol y bóveda de API keys cifrada</h3>
+      <dl>
+        <dt>Stack</dt><dd>Cifrado · RLS · control de acceso</dd>
+        <dt>Alcance</dt><dd>Detección y corrección de vulnerabilidades en sistemas activos</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ZONA 05 · EQUIPAJE ============ -->
+<section class="wrap" id="equipaje">
+  <div class="zone-head" data-reveal>
+    <div class="znum">Z-05</div>
+    <div class="ztxt"><h2>Equipaje de mano</h2><span class="en">Habilidades / Carry-on</span></div>
+    <div class="zarr">→</div>
+  </div>
+
+  <div class="chips-group" data-reveal>
+    <span class="glbl">Diseño & producción</span>
+    <div class="chips">
+      <span>CorelDRAW</span><span>Photoshop</span><span>Illustrator</span><span>AutoCAD 2D/3D</span><span>Adobe XD</span><span>Señalética & wayfinding</span><span>Dirección de arte</span>
+    </div>
+  </div>
+  <div class="chips-group" data-reveal>
+    <span class="glbl">Desarrollo & sistemas</span>
+    <div class="chips">
+      <span>Next.js</span><span>Supabase</span><span>React</span><span>HTML / CSS</span><span>Git / GitHub</span><span>Docker</span><span>n8n</span>
+    </div>
+  </div>
+  <div class="chips-group" data-reveal>
+    <span class="glbl">IA & prompt engineering</span>
+    <div class="chips t">
+      <span>Claude</span><span>Gemini</span><span>Grok</span><span>DeepSeek</span><span>Recraft V3</span><span>Bing Image Creator</span><span>Agentes de codificación</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ZONA 05b · REFERENCIAS ============ -->
+<section class="wrap" id="referencias">
+  <div class="zone-head" data-reveal>
+    <div class="znum">Z-05b</div>
+    <div class="ztxt"><h2>Referencias</h2><span class="en">References</span></div>
+    <div class="zarr">→</div>
+  </div>
+
+  <div class="connex">
+    <div class="cx" data-reveal>
+      <span class="cxtag">Referencia</span>
+      <h3>Uriel Gómez</h3>
+      <dl>
+        <dt>Cargo</dt><dd>Subgerente, DIO Estudio</dd>
+        <dt>Teléfono</dt><dd>301 662 3668</dd>
+      </dl>
+    </div>
+    <div class="cx" data-reveal>
+      <span class="cxtag">Referencia</span>
+      <h3>Wendy Peñaranda</h3>
+      <dl>
+        <dt>Cargo</dt><dd>RR. HH., Seguridad y Servicios</dd>
+        <dt>Teléfono</dt><dd>301 512 1582</dd>
+      </dl>
+    </div>
+    <div class="cx" data-reveal>
+      <span class="cxtag">Referencia</span>
+      <h3>Ana Navarro Garcia</h3>
+    </div>
+    <div class="cx" data-reveal>
+      <span class="cxtag">Referencia</span>
+      <h3>Derys Lambis</h3>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ZONA 06 · SALIDA ============ -->
+<section class="wrap" id="salida">
+  <div class="zone-head" data-reveal>
+    <div class="znum">Z-06</div>
+    <div class="ztxt"><h2>Salida</h2><span class="en">Contacto / Exit</span></div>
+    <div class="zarr">→</div>
+  </div>
+
+  <div class="exit-panel" data-reveal>
+    <div class="exit-sign">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="13" cy="4.6" r="1.8" fill="#07130C"/>
+        <path d="M10.5 8.5l3-1 2.5 3.5 3 1M13.5 7.5l-2 5 3 3-1 5M11.5 12.5l-2.5 2-2 4.5" stroke="#07130C" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M20 12v8h-3" stroke="#07130C" stroke-width="1.7" stroke-linecap="round" fill="none"/>
+      </svg>
+      <div class="xw">Salida<small>Exit →</small></div>
+    </div>
+    <div class="exit-info">
+      <p>Disponible para proyectos de señalización, branding, diseño ambiental y sistemas con IA.</p>
+      <div class="exit-ctas">
+        <a class="xbtn" href="mailto:eddieencisob@gmail.com">eddieencisob@gmail.com</a>
+        <a class="xbtn o" href="tel:+573104640708">3104640708</a>
+      </div>
+    </div>
+  </div>
+
+  <figure class="exit-photo" data-reveal style="margin-left:0; margin-right:0;">
+    <img src="images/salida-exit.jpg" alt="Letrero luminoso Salida/Exit en acrílico con luz verde, fabricado para los aeropuertos del Nororiente" loading="lazy">
+    <figcaption><b>Dato:</b> este letrero de salida es diseño propio — fabricado e instalado en los aeropuertos del Nororiente colombiano.</figcaption>
+  </figure>
+</section>
+
+<footer>
+  <span>Eddie Enciso — Terminal EE · Barranquilla, Colombia</span>
+  <span>Diseñado y construido con IA · Rev. 2026</span>
+</footer>
+
+<script>
+(function(){
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- split-flap name ---- */
+  var GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  document.querySelectorAll('.flapword').forEach(function(wordEl, wi){
+    var word = wordEl.getAttribute('data-word');
+    var accentLast = wordEl.hasAttribute('data-last-accent');
+    word.split('').forEach(function(ch, i){
+      var tile = document.createElement('span');
+      tile.className = 'flap' + (accentLast && i === word.length - 1 ? ' accent' : '');
+      if (reduceMotion){
+        tile.textContent = ch;
+      } else {
+        tile.textContent = GLYPHS[Math.floor(Math.random()*26)];
+        var delay = 240 + wi*260 + i*95;
+        var spins = 7 + Math.floor(Math.random()*5);
+        setTimeout(function(){
+          var n = 0;
+          var iv = setInterval(function(){
+            n++;
+            if (n >= spins){ tile.textContent = ch; clearInterval(iv); }
+            else { tile.textContent = GLYPHS[Math.floor(Math.random()*26)]; }
+          }, 62);
+        }, delay);
+      }
+      wordEl.appendChild(tile);
+    });
+  });
+
+  /* ---- clock ---- */
+  var clock = document.getElementById('clock');
+  function tick(){
+    var d = new Date();
+    clock.textContent = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  }
+  tick(); setInterval(tick, 30000);
+
+  /* ---- reveals ---- */
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold:.15 });
+  document.querySelectorAll('[data-reveal]').forEach(function(el){ io.observe(el); });
+
+  /* ---- rail scrollspy ---- */
+  var links = document.querySelectorAll('.rail a');
+  var spy = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('data-zone') === e.target.id); });
+      }
+    });
+  }, { rootMargin:'-42% 0px -52% 0px', threshold:0 });
+  ['hero','perfil','trayectoria','puertas','conexiones','equipaje','referencias','salida'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) spy.observe(el);
+  });
+
+  /* ---- progress bar ---- */
+  var bar = document.getElementById('progress');
+  var ticking = false;
+  window.addEventListener('scroll', function(){
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){
+      var h = document.documentElement;
+      var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+      bar.style.width = p + '%';
+      ticking = false;
+    });
+  }, { passive:true });
+})();
+</script>
+
+</body>
+</html>
